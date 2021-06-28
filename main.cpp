@@ -7,6 +7,7 @@ int main(int argc, char *argv[])
     #ifdef Q_OS_WIN
         system("chcp 936 > nul");
         system("chcp 65001 >　nul");
+        system("ls");
     #endif
 
     QApplication a(argc, argv);
