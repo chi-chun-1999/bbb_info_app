@@ -41,6 +41,7 @@ set(PROJECT_SOURCES
         server_lib.cpp
         meeting_lib.cpp
         attendee_lib.cpp
+        xml_reader_lib.cpp
         ${TS_FILES}
 )
 

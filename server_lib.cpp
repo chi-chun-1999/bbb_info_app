@@ -23,13 +23,35 @@ QString Server::getMeetings()
 }
 void Server::getData(QString data)
 {
-    int meeting_str_times=0;
+    xml_reader_=new XmlReader();
+    xml_reader_->addData(data);
+
+    xml_reader_->readData();
+    vector<MeetingData> meeting_data=xml_reader_->getMeetingData();
+
+    for(auto &iter:meeting_data)
+    {
+        qDebug()<<iter.meeting_name;
+        qDebug()<<iter.create_date;
+        qDebug()<<iter.attendee_pw;
+        qDebug()<<iter.moderator_pw;
+        for(auto &iter_attendee:iter.attendees)
+        {
+
+            qDebug()<<iter_attendee.name;
+            qDebug()<<iter_attendee.role;
+        }
+    }
+
+    /*int meeting_str_times=0;
     bool save=0;
     vector<MeetingData> meeting_data;
-    MeetingData tmp;
+    MeetingData tmp;*/
+
     //string data_str=data.toUtf8().constData();
     //cout<<data_str<<endl;
-    QStringList lines=data.split("\n",QString::SkipEmptyParts);
+
+    /*QStringList lines=data.split("\n",QString::SkipEmptyParts);
     foreach(QString line,lines)
     {
         string::size_type found;
@@ -61,7 +83,7 @@ void Server::getData(QString data)
     for(auto &iter:meeting_data)
     {
         qDebug()<<iter.meeting_name;
-    }
+    }*/
 }
 string Server::splitString(string src,string split_text)
 {

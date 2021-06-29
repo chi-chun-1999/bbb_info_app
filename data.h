@@ -8,6 +8,8 @@
 #include<QString>
 #include<QStringList>
 #include<QDebug>
+#include<QXmlStreamReader>
+
 
 using namespace std;
 
@@ -20,17 +22,40 @@ typedef struct AttendeeData
 typedef struct MeetingData
 {
     QString meeting_name;
-    QString date;
+    QString create_date;
+    QString attendee_pw;
+    QString moderator_pw;
     QString attending_URL;
     vector<AttendeeData> attendees;
 }MeetingData;
 
 typedef struct FindString
 {
-    string meeting="meeting";
-    string meeting_name="meetingName";
-    string attendee_pw="attendeesPW";
+    QString meeting="meeting";
+    QString meeting_name="meetingName";
+    QString create_date="createDate";
+    QString full_name="fullName";
+    QString attendee_pw="attendeePW";
+    QString moderator_pw="moderatorPW";
+    QString role="role";
+    QString attendee="attendee";
+    QString attendees="attendees";
+
 }FindString;
+
+class XmlReader:public QXmlStreamReader
+{
+    public:
+
+        XmlReader();
+        void readData();
+        vector<MeetingData> getMeetingData();
+        ~XmlReader();
+
+    private:
+        vector<MeetingData> meeting_data;
+
+};
 
 class Attendee
 {
@@ -54,9 +79,10 @@ class Meeting
         QString getName();
         MeetingData getData();
 
-        void setMeetingName(QString name);
-        void setAttendee(QString attendee_name,QString role);
-        void setPW(QString attendeesPW,QString moderatorPW);
+        void setData(MeetingData meeting_data);
+        void generateAttendingURL();
+        QString getAttendingURL();
+
         ~Meeting();
     private:
         QString name_;
@@ -86,6 +112,8 @@ class Server
         vector<QString> meeting_names_;
         QString domain_name_;
         QString getMeetings_URL_;
+
+        XmlReader *xml_reader_=new XmlReader;
 };
 
 #endif

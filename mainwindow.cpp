@@ -39,7 +39,12 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(manager, SIGNAL(finished(QNetworkReply*)),
         this, SLOT(managerFinished(QNetworkReply*)));
 
+    ui->label_meeting_name_info->setStyleSheet("color:gray");
+    ui->label_creat_date_info->setStyleSheet("color:gray");
+
+
 }
+
 void MainWindow::managerFinished(QNetworkReply *reply) {
     if (reply->error()) {
         qDebug() << reply->errorString();
