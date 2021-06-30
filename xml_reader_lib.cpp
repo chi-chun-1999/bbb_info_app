@@ -22,6 +22,10 @@ void XmlReader::readData()
             {
                 tmp.meeting_name=readElementText();
             }
+            if(this->name()==find_str.meeting_id)
+            {
+                tmp.meeting_id=readElementText();
+            }
             if(this->name()==find_str.create_date)
             {
                 tmp.create_date=readElementText();

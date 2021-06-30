@@ -8,7 +8,7 @@ Server::Server()
 void Server::setGetMeetingsURL(QString domain_name)
 {
     domain_name_=domain_name;
-    domain_name_="bbb2.ical.tw";
+    //domain_name_="bbb2.ical.tw";
     QString https="https://";
     QString bbb="/bigbluebutton/api/getMeetings?checksum=";
     QString checksum="b2f3e005ff665505815084b10070d557289d0f13";
@@ -21,7 +21,7 @@ QString Server::getMeetings()
 {
     return getMeetings_URL_;
 }
-void Server::getData(QString data)
+void Server::setData(QString data)
 {
     xml_reader_=new XmlReader();
     xml_reader_->addData(data);
@@ -29,62 +29,41 @@ void Server::getData(QString data)
     xml_reader_->readData();
     vector<MeetingData> meeting_data=xml_reader_->getMeetingData();
 
-    for(auto &iter:meeting_data)
+    meetings_.resize(meeting_data.size());
+    for(int i=0;i<meeting_data.size();i++)
     {
-        qDebug()<<iter.meeting_name;
-        qDebug()<<iter.create_date;
-        qDebug()<<iter.attendee_pw;
-        qDebug()<<iter.moderator_pw;
-        for(auto &iter_attendee:iter.attendees)
-        {
-
-            qDebug()<<iter_attendee.name;
-            qDebug()<<iter_attendee.role;
-        }
+        meetings_[i].setDomainName(domain_name_);
+        meetings_[i].setShareSecret(share_serect_);
+        meetings_[i].setData(meeting_data[i]);
     }
 
-    /*int meeting_str_times=0;
-    bool save=0;
-    vector<MeetingData> meeting_data;
-    MeetingData tmp;*/
-
-    //string data_str=data.toUtf8().constData();
-    //cout<<data_str<<endl;
-
-    /*QStringList lines=data.split("\n",QString::SkipEmptyParts);
-    foreach(QString line,lines)
-    {
-        string::size_type found;
-        string line_str=line.toUtf8().constData();
-        if(line_str.find("meeting>")!=string::npos)
-        {
-            meeting_str_times++;
-        }
-        if(meeting_str_times%2==1)
-        {
-            save=1;
-            found=line_str.find(find_string.meeting_name);
-           if(found!=string::npos)
-           {
-              string str=splitString(line_str,find_string.meeting_name);
-                tmp.meeting_name=QString::fromStdString(str);
-
-           }
-        }
-        else if(meeting_str_times%2==0&&save==1)
-        {
-           meeting_data.push_back(tmp);
-           tmp.meeting_name="";
-           save=0;
-        }
-
-    }
-
-    for(auto &iter:meeting_data)
-    {
-        qDebug()<<iter.meeting_name;
-    }*/
 }
+
+void Server::setShareSecret(QString data)
+{
+    share_serect_=data;
+}
+
+MeetingData Server::getCurrentMeetingData(int index)
+{
+    return meetings_[index].getData();
+}
+
+vector<QString> Server::getMeetingsName()
+{
+    for(auto& iter:meetings_)
+    {
+        meeting_names_.push_back(iter.getName());
+    }
+
+    return meeting_names_;
+}
+
+int Server::getMeetingNum()
+{
+    return meetings_.size();
+}
+
 string Server::splitString(string src,string split_text)
 {
    cout<<src<<endl;

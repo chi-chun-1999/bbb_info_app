@@ -8,6 +8,9 @@
 #include <QTextCodec>
 #include<QLabel>
 #include<QDesktopWidget>
+#include<QPushButton>
+#include<QResizeEvent>
+#include<QVBoxLayout>
 #include<math.h>
 #include<iostream>
 #include<cstdlib>
@@ -33,6 +36,23 @@ class ErrorWindow :public QWidget
         int widget_width_;
 };
 
+class MeetingButtonSlot:public QObject
+{
+   Q_OBJECT
+
+    public:
+        void setIndex(const int index);
+        void print();
+
+    signals:
+        void getIndex(int index);
+    public slots:
+        void getSignal();
+
+    private:
+        int index_;
+};
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -41,12 +61,18 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     void requestFinished(QNetworkReply* reply);
-
+    void setTableWidget();
+    void meetingsButton();
 
 private slots:
     void on_pushButton_get_info_clicked();
     void managerFinished(QNetworkReply *reply);
+    void getCurrentMeetingIndex(int index);
+    //void do_meeting_button_clicked(int index);
 private:
+
+    vector<QPushButton*> meetings_button_;
+    vector<MeetingButtonSlot*> meetings_button_slot_;
 
     QPoint location_;
     Ui::MainWindow *ui;
@@ -55,6 +81,7 @@ private:
     QNetworkRequest request;
 
     Server server_;
+    MeetingData current_meeting_data_;
 
     ErrorWindow error_window_;
 };
