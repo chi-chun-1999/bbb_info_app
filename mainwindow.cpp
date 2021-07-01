@@ -10,10 +10,59 @@ ErrorWindow::ErrorWindow()
     this->resize(widget_width_,widget_height_);
     this->setWindowTitle("Error");
     label_=new QLabel(this);
-    label_->setGeometry(0,0,400,300);
+    //label_->setGeometry(0,0,400,300);
     label_->setText("Error");
     label_->setAlignment(Qt::AlignCenter);
-    label_->setStyleSheet("font-size:20px;color:red;");
+    label_->setStyleSheet("font-size:25px;color:red;");
+    error_content_=new QLabel(this);
+    error_content_->setText("error content");
+    error_content_->setAlignment(Qt::AlignCenter);
+    QVBoxLayout* v_layout=new QVBoxLayout;
+    v_layout->addWidget(label_);
+    v_layout->addWidget(error_content_);
+    v_layout->setSpacing(0);
+    v_layout->setMargin(100);
+    this->setLayout(v_layout);
+
+}
+
+void ErrorWindow::error1()
+//can't not find server;
+{
+    setText("Error 1");
+    error_content_->setText("Can't Find Server");
+
+}
+
+void ErrorWindow::error2()
+//can't not find server or share secret is error
+{
+    setText("Error 2");
+    error_content_->setText("Share Serect is Error");
+
+}
+
+void ErrorWindow::error3()
+//can't not open file
+{
+    setText("Error 3");
+    error_content_->setText("Can't Open File");
+
+}
+
+void ErrorWindow::error4()
+//no meeting
+{
+    setText("No Meeting");
+    error_content_->setText("");
+
+}
+void ErrorWindow::error5()
+//Please input domain name and share secret file
+{
+    setText("Error 5");
+    error_content_->setText("Please input domain name and share sercret file");
+
 }
 void ErrorWindow::setText(QString text)
 {
@@ -39,7 +88,7 @@ void MeetingButtonSlot::setIndex(const int index)
 }
 void MeetingButtonSlot::print()
 {
-    qDebug()<<this->index_;
+    //qDebug()<<this->index_;
 }
 void MeetingButtonSlot::getSignal()
 {
@@ -126,26 +175,47 @@ void MainWindow::meetingsButton()
 }
 
 void MainWindow::managerFinished(QNetworkReply *reply) {
-    if (reply->error()) {
-        qDebug() << reply->errorString();
-        error_window_.setText("Cannot Find Sever");
-        ui->centralwidget->pos().rx();
-        error_window_.setLocation(location_.x(),location_.y(),ui->centralwidget->width(),ui->centralwidget->height());
-        error_window_.show();
+    if (reply->error()&&error_!=1) {
+        //qDebug() << reply->errorString();
+        //error_window_.error1();
+        //ui->centralwidget->pos().rx();
+        //error_window_.setLocation(location_.x(),location_.y(),ui->centralwidget->width(),ui->centralwidget->height());
+        //error_window_.show();
+        error(ERROR1);
+    errorWindowShow();
         return;
     }
 
     QString answer=QString::fromUtf8("Encoding");
-           answer = reply->readAll();
-           server_.setData(answer);
+    answer = reply->readAll();
+    server_.setData(answer);
 
-           this->meetingsButton();
-    //qDebug() << answer;
-           //QStringList lines=answer.split("\n",QString::SkipEmptyParts);
-           //foreach(QString line,lines)
-           //{
-           //    qDebug()<<line;
-           //}
+    if(server_.errorReadXml()==RETURN_FAIL&&error_!=1)
+    {
+        //qDebug() << reply->errorString();
+        //error_window_.error2();
+        //ui->centralwidget->pos().rx();
+        //error_window_.setLocation(location_.x(),location_.y(),ui->centralwidget->width(),ui->centralwidget->height());
+        //error_window_.show();
+        error(ERROR2);
+    errorWindowShow();
+        return;
+
+    }
+
+    if(server_.errorReadXml()==NO_MEETING&&error_!=1)
+    {
+        //error_window_.error4();
+        //ui->centralwidget->pos().rx();
+        //error_window_.setLocation(location_.x(),location_.y(),ui->centralwidget->width(),ui->centralwidget->height());
+        //error_window_.show();
+        //qDebug()<<"hello";
+        error(ERROR4);
+    errorWindowShow();
+        return;
+
+    }
+    this->meetingsButton();
 }
 
 void MainWindow::getCurrentMeetingIndex(int index)
@@ -174,12 +244,95 @@ void MainWindow::on_pushButton_get_info_clicked()
         QMetaObject::Connection connRet = QObject::connect(naManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(managerFinished(QNetworkReply*)));
         Q_ASSERT(connRet);
 
+
+        //get domain and share secret
+        error_=0;
+
+        if(ui->lineEdit_domain_name->text()=="" || ui->lineEdit_share_secret_file->text()=="")
+        {
+            error(ERROR5);
+            errorWindowShow();
+            return;
+        }
+
         server_.setGetMeetingsURL(ui->lineEdit_domain_name->text());
+        getShareSecret();
+
+
         QString request_url=server_.getMeetings();
         request.setUrl(QUrl(request_url));
         QNetworkReply* reply = naManager->get(request);
 }
 
+void MainWindow::on_pushButton_browse_clicked()
+{
+   QString file_name=QFileDialog::getOpenFileName(this,"Open a file","..",tr("SH3 Log files (*.secret)"));
+   //qDebug()<<file_name;
+   ui->lineEdit_share_secret_file->setText(file_name);
+    getShareSecret();
+
+}
+
+void MainWindow::on_pushButton_copy_clicked()
+{
+    QClipboard *clip=QApplication::clipboard();
+    QString copy_text=ui->lineEdit_attend_meeting_info->text();
+    clip->setText(copy_text);
+}
+
+void MainWindow::getShareSecret()
+{
+    QString file_name=ui->lineEdit_share_secret_file->text();
+
+    QFile file(file_name);
+    if(!file.open(QIODevice::ReadOnly)&&error_!=1)
+    {
+        //qDebug()<<"error open file"<<file.error();
+        //error_window_.error3();
+        //ui->centralwidget->pos().rx();
+        //error_window_.setLocation(location_.x(),location_.y(),ui->centralwidget->width(),ui->centralwidget->height());
+        //error_window_.show();
+        error(ERROR3);
+    errorWindowShow();
+        return;
+    }
+    QTextStream instream(&file);
+    QString share_secret=instream.readLine();
+    server_.setShareSecret(share_secret);
+    file.close();
+    return;
+
+}
+
+void MainWindow::error(Error err)
+{
+    switch(err)
+    {
+        case ERROR1:
+            error_window_.error1();
+            break;
+        case ERROR2:
+            error_window_.error2();
+            break;
+        case ERROR3:
+            error_window_.error3();
+            break;
+        case ERROR4:
+            error_window_.error4();
+            break;
+        case ERROR5:
+            error_window_.error5();
+            break;
+    }
+    error_=1;
+}
+void MainWindow::errorWindowShow()
+{
+        ui->centralwidget->pos().rx();
+        error_window_.setLocation(location_.x(),location_.y(),ui->centralwidget->width(),ui->centralwidget->height());
+        error_window_.show();
+
+}
 
 void MainWindow::moveEvent(QMoveEvent *e)
 {

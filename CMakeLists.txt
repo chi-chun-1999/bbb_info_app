@@ -37,13 +37,17 @@ set(PROJECT_SOURCES
         mainwindow.cpp
         mainwindow.h
         mainwindow.ui
-        data.h
-        server_lib.cpp
-        meeting_lib.cpp
-        attendee_lib.cpp
-        xml_reader_lib.cpp
+        #data.h
+        #server_lib.cpp
+        #meeting_lib.cpp
+        #attendee_lib.cpp
+        #xml_reader_lib.cpp
         ${TS_FILES}
 )
+
+set(LIB_PATHS
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/data
+    )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(bbb_info_app
@@ -54,7 +58,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
 else()
     if(ANDROID)
         add_library(bbb_info_app SHARED
-            ${PROJECT_SOURCES}
+            ${PROJECT_SOURCES} data_lib
         )
     else()
         add_executable(bbb_info_app
