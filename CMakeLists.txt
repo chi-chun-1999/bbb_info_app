@@ -34,9 +34,9 @@ set(TS_FILES bbb_info_app_zh_TW.ts)
 
 set(PROJECT_SOURCES
         main.cpp
-        mainwindow.cpp
-        mainwindow.h
-        mainwindow.ui
+        #mainwindow.cpp
+        #mainwindow.h
+        #mainwindow.ui
         #data.h
         #server_lib.cpp
         #meeting_lib.cpp
@@ -47,7 +47,12 @@ set(PROJECT_SOURCES
 
 set(LIB_PATHS
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/data
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/ui
     )
+
+
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/lib.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/deps.cmake)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(bbb_info_app
@@ -58,7 +63,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
 else()
     if(ANDROID)
         add_library(bbb_info_app SHARED
-            ${PROJECT_SOURCES} data_lib
+            ${PROJECT_SOURCES} ui_lib data_lib
         )
     else()
         add_executable(bbb_info_app
@@ -69,4 +74,6 @@ else()
     qt5_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 endif()
 
-target_link_libraries(bbb_info_app PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Network)
+
+
+target_link_libraries(bbb_info_app PRIVATE ui_lib data_lib Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Network)
